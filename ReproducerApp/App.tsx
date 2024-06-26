@@ -1,118 +1,114 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
+import React, {useState} from 'react';
+import ReactNative, {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
-  StatusBar,
+  ScrollViewProps,
   StyleSheet,
   Text,
-  useColorScheme,
+  TextInputProps,
   View,
+  ViewProps,
 } from 'react-native';
-
 import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  SafeAreaProvider,
+  SafeAreaView,
+  SafeAreaViewProps,
+} from 'react-native-safe-area-context';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const theme = {
+  spacing: [0, 4, 8, 12, 16, 20, 24, 32, 40, 48] as const,
+};
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const styles = StyleSheet.create({
+  safeAreaView: {
+    flex: 1,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContentContainer: {
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing[5],
+    paddingBottom: theme.spacing[5],
+  },
+  footer: {
+    paddingHorizontal: theme.spacing[5],
+  },
+});
+
+function Layout({children, style, testID, ...props}: SafeAreaViewProps) {
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
+    <SafeAreaView style={[styles.safeAreaView, style]} {...props}>
+      <KeyboardAvoidingView
+        testID={testID}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={theme.spacing[5]}
+        style={styles.keyboardAvoidingView}>
         {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+function Main({children, style, ...props}: ScrollViewProps) {
+  return (
+    <ScrollView
+      contentContainerStyle={styles.scrollViewContentContainer}
+      keyboardShouldPersistTaps="handled"
+      style={[styles.scrollView, style]}
+      {...props}>
+      {children}
+    </ScrollView>
+  );
+}
 
-export default App;
+function Footer({children, style, ...props}: ViewProps) {
+  return (
+    <View style={[styles.footer, style]} {...props}>
+      {children}
+    </View>
+  );
+}
+
+function TextInput(props: TextInputProps) {
+  return (
+    <ReactNative.TextInput
+      style={{
+        borderColor: '#aaa',
+        borderRadius: 12,
+        borderWidth: 1,
+        margin: 16,
+        padding: 12,
+        width: '100%',
+      }}
+      {...props}
+    />
+  );
+}
+
+function Screen1() {
+  const [value, setValue] = useState('');
+
+  return (
+    <Layout testID="screen1">
+      <Main>
+        <TextInput value={value} onChangeText={setValue} placeholder="Input" />
+      </Main>
+      <Footer>
+        <Text>Footer</Text>
+      </Footer>
+    </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <Screen1 />
+    </SafeAreaProvider>
+  );
+}
