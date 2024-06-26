@@ -1,7 +1,11 @@
+import {useHeaderHeight} from '@react-navigation/elements';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useState} from 'react';
 import ReactNative, {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   ScrollViewProps,
   StyleSheet,
@@ -41,12 +45,14 @@ const styles = StyleSheet.create({
 });
 
 function Layout({children, style, testID, ...props}: SafeAreaViewProps) {
+  const headerHeight = useHeaderHeight();
+
   return (
     <SafeAreaView style={[styles.safeAreaView, style]} {...props}>
       <KeyboardAvoidingView
         testID={testID}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={theme.spacing[5]}
+        keyboardVerticalOffset={headerHeight + theme.spacing[9]}
         style={styles.keyboardAvoidingView}>
         {children}
       </KeyboardAvoidingView>
@@ -91,10 +97,30 @@ function TextInput(props: TextInputProps) {
 }
 
 function Screen1() {
+  const navigation = useNavigation();
   const [value, setValue] = useState('');
 
   return (
     <Layout testID="screen1">
+      <Main>
+        <TextInput value={value} onChangeText={setValue} placeholder="Input" />
+      </Main>
+      <Footer>
+        <Pressable onPress={() => navigation.navigate('2')}>
+          <Text>Go to screen 2</Text>
+        </Pressable>
+      </Footer>
+    </Layout>
+  );
+}
+
+function Screen2() {
+  const [value, setValue] = useState('');
+
+  console.debug('Screen2');
+
+  return (
+    <Layout testID="screen2">
       <Main>
         <TextInput value={value} onChangeText={setValue} placeholder="Input" />
       </Main>
@@ -105,10 +131,18 @@ function Screen1() {
   );
 }
 
+const {Navigator, Screen} = createNativeStackNavigator();
+
 export default function App() {
   return (
     <SafeAreaProvider>
-      <Screen1 />
+      <NavigationContainer>
+        <Navigator>
+          <Screen name="1" component={Screen1} />
+          <Screen name="2" component={Screen2} />
+        </Navigator>
+      </NavigationContainer>
+      {/* <Screen1 /> */}
     </SafeAreaProvider>
   );
 }
